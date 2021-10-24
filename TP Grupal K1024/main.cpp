@@ -808,3 +808,4 @@ void EscribirReporteCSV(compra v[], int tam)
     fclose(f);
     return;
 }
+
