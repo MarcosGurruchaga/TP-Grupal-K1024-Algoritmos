@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1635033401 source:c:\marcos\tp grupal k1024 algoritmos\main.cpp
+	<stdio.h>
+	<ctime>
+	<cstring>
+	<iostream>
+	<conio.h>
+	<cstdlib>
+
