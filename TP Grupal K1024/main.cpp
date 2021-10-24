@@ -324,34 +324,6 @@ void ContarClientes(int &contador)
     return ;
 }
 
-void CargarCliente(int &b)
-{
-    FILE* USERS;
-    char ff[9], dirmail[150];
-    time_t rawtime=time(0);
-    struct  tm timeinfo;
-    timeinfo =*localtime(&rawtime);
-    strftime(ff,80,"%Y-%m-%d",   &timeinfo);
-
-    USERS = fopen("USUARIOS.bin", "ab+");
-
-    fflush(stdin);
-    cliente usuarios;
-    usuarios.id_client=b;
-    strcpy(usuarios.fechcrea,ff);
-
-    usuarios.totalcom = 0;
-
-    usuarios.estado=true;
-    printf("Ingrese su mail: ");
-    scanf ("%79s",dirmail);
-
-    strcpy(usuarios.mail,dirmail);
-
-    fwrite(&usuarios, sizeof(cliente), 1, USERS);
-    fclose(USERS);
-
-}
 
 void cargarCiente(void){
 
