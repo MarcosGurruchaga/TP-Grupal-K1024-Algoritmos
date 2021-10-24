@@ -162,7 +162,8 @@ int main ()
                 cout<< "\n Reporte en CSV creado exitosamente";
                 cout<< "\n PRESIONE CUALQUIER TECLA PARA REGRESAR";
                 getch();
-
+            case 10:
+                return 0;
             break;
         }
     }
@@ -349,7 +350,7 @@ void cargarCiente(void){
     aux[i].totalcom=0;
     strcpy(aux[i].fechcrea, "11/11/2021");
 
-    cout<<"ingrese mail: ";
+    cout<<"Ingrese mail del usuario: ";
     cin>>email;
 
     strcpy(aux[i].mail, email.c_str());
