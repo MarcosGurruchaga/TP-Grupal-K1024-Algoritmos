@@ -162,6 +162,7 @@ int main ()
                 cout<< "\n Reporte en CSV creado exitosamente";
                 cout<< "\n PRESIONE CUALQUIER TECLA PARA REGRESAR";
                 getch();
+            break;
             case 10:
                 return 0;
             break;
@@ -735,13 +736,13 @@ void EscribirReporteHTML(compra v[], int tam)
 
     fprintf(f,"<h1 style='font-family: Arial, Helvetica, sans-serif;'>Lotes entre el %s y el %s </h1>\n",c1,c2);
     fprintf(f,"<table id='clientes' >\n");
-    fprintf(f,"<th>Cliente</th> <th>Fecha</th> <th>Nro de Articulo</th> <th>Monto</th> <th>N Articulo</th> <th>Cantidad</th>\n");
+    fprintf(f,"<th>Cliente</th> <th>Fecha</th> <th>Nro de Articulo</th> <th>Monto</th> <th>Cantidad</th>\n");
 
     while (v[i].monto!=0)
     {
         if (strcmp(c1, v[i].fechactucom) <= 0 && strcmp(c2, v[i].fechactucom) >= 0) {
         fprintf(f,"<tr>\n");
-        fprintf(f,"<td>%d</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td>\n",v[i].id_compra,v[i].fechactucom,v[i].monto,v[i].usid,v[i].narticulo,v[i].cantidad);
+        fprintf(f,"<td>%d</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td>\n",v[i].usid,v[i].fechactucom,v[i].id_compra,v[i].narticulo,v[i].cantidad);
         fprintf(f,"</tr>\n");
         }
         i++;
@@ -769,12 +770,12 @@ void EscribirReporteCSV(compra v[], int tam)
     int i= 0;
 
     f = fopen("Reporte de lotes en excel.csv", "wt");
-    fprintf(f,"Cliente;Fecha;Nro de Articulo;Monto;N Articulo;Cantidad;\n");
+    fprintf(f,"Cliente;Fecha;Nro de Articulo;Monto;Cantidad;\n");
 
     while (v[i].monto!=0)
     {
         if (strcmp(c1, v[i].fechactucom) <= 0 && strcmp(c2, v[i].fechactucom) >= 0) {
-        fprintf(f,"%d;%s;%d;%d;%d;%d;\n",v[i].id_compra,v[i].fechactucom,v[i].monto,v[i].usid,v[i].narticulo,v[i].cantidad);
+        fprintf(f,"%d;%s;%d;%d;%d;\n",v[i].usid,v[i].fechactucom,v[i].id_compra,v[i].narticulo,v[i].cantidad);
          }
         i++;
     }
