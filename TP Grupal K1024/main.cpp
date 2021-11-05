@@ -39,11 +39,11 @@ void BuscarYMostrarCliente(void);
 void ListarClientes(void);
 void EscribirReporteHTML(compra [], int );
 void EscribirReporteCSV(compra [], int );
-void ProcesarLote(bool);
+void ProcesarLote(void);
 void CompraRand(cliente,compra&,float&);
 void MostrarComprasDeUsuario(int);
 void cargarCiente(void);
-
+void GenerarLote(void);
 ///***************************  MAIN  ************************************
 
 int main ()
@@ -54,8 +54,8 @@ int main ()
 	bool option=false;
 	cliente aux;
     FILE *COMPRAS;
-    COMPRAS = fopen("PROCESADOS.bin", "rb");
-    if(!COMPRAS)ProcesarLote(0);
+    //COMPRAS = fopen("PROCESADOS.bin", "rb");
+    //if(!COMPRAS)ProcesarLote(0);
     compra shop[1000];
     int j=0;
     while(1){
@@ -110,7 +110,8 @@ int main ()
 
             case 6:
                 system("cls");
-                ProcesarLote(1);
+                GenerarLote();
+                ProcesarLote();
                 cout<< "\n SE HA PROCESADO UN LOTE EXITOSAMENTE";
                 cout<< "\n PRESIONE CUALQUIER TECLA PARA REGRESAR";
                 getch();
@@ -128,7 +129,7 @@ int main ()
                 getch();
             break;
             case 8:
-
+                COMPRAS = fopen("PROCESADOS.bin", "rb");
                  if (COMPRAS){
                 fread(&shop[j],sizeof(compra),1,COMPRAS);
 
@@ -147,6 +148,7 @@ int main ()
 
             break;
             case 9:
+                COMPRAS = fopen("PROCESADOS.bin", "rb");
                  if (COMPRAS){
                 fread(&shop[j],sizeof(compra),1,COMPRAS);
 
@@ -562,18 +564,21 @@ void ListarClientes()
     delete []p;
 }
 //********** PUNTO 6  *************//
-void ProcesarLote(bool sec){
+void GenerarLote(void){
 
-    srand((long)time(NULL));
+    srand((long)time(NULL));//GRNERO UNA SEMILLA ALEATORIA
 
-    FILE *USERS, *COMP;
+    FILE *USERS, *LOTE;
     int s=0, i=0, e = 0, cantU=0;
-    ContarClientes(cantU);
-    cliente *aux = new cliente[cantU-1];
+
     compra c;
-    compra shop[1000];
     short cnt_cpr;
     float monto_x_c;
+
+    /*DECLARO UN VECTOR DE USUARIOS Y LO CARGO CON LOS CLIENTES EN EL ARCHIVO US.BIN PARA GENERAR LAS COMPRAS ALEATORIAS*/
+
+    ContarClientes(cantU);
+    cliente *aux = new cliente[cantU-1];
 
     if (USERS = fopen("USUARIOS.bin","rb")){
 
@@ -588,24 +593,11 @@ void ProcesarLote(bool sec){
 
     fclose(USERS);
 
-    if(sec){
-        compra compaux[1000];
+    /*AHORA VOY A GENERAR UN ARCHIVO DE LOTE, CON COMPRAS ALEATORIAS PARA POSTERIORMENTE SER PROCESADO*/
 
-        if (COMP = fopen("PROCESADOS.bin","rb")){
-            fread(&shop[e],sizeof(compra),1,COMP);
+    LOTE = fopen("LOTE.bin","wb");
 
-            while (!feof(COMP)){
-                e++;
-                fread(&shop[e],sizeof(compra),1,COMP);
-
-            }
-            fclose(COMP);
-        }
-
-        ///EL ARCHIVO YA ESTA COPIADO EN EL VECTOR
-
-        short posAencajar, primerPos=0, ultimaPos=0;
-        for (int a=1 ; a<cantU-1 ; a++){//PARA CADA USUARIO SE VA A GENERAR UNA CANTIDAD DE COMPRAS ALEATORIAS
+        for (int a=0 ; a<cantU-1 ; a++){//PARA CADA USUARIO SE VA A GENERAR UNA CANTIDAD DE COMPRAS ALEATORIAS
 
             cnt_cpr = rand()%5+1;
             for(int b = 0 ; b<cnt_cpr; b++){//SE GENERAN ENTRE 1 Y 5 COMPRAS X USUARIO
@@ -614,50 +606,102 @@ void ProcesarLote(bool sec){
                                                  //POSTERIORMENTE EL USUARIOS.BIN
                 aux[a].totalcom += monto_x_c;
 
-                while( shop[primerPos].usid != c.usid && (primerPos + 1) != e)primerPos++;
 
-                if((primerPos + 1) != e)while( shop[primerPos].usid == c.usid)primerPos++;
-                ultimaPos = primerPos;
+                /*cout<<"\nCANTIDAD: "<<c.cantidad<<endl;
+                cout<<"FECHA: "<<c.fechactucom;
+                cout<<"ID.COMPRA: "<<c.id_compra<<endl;
+                cout<<"MONTO: "<<c.monto<<endl;
+                cout<<"NRO DE ARTICULO: "<<c.narticulo<<endl;
+                cout<<"USER ID: "<<c.usid<<endl;*/
 
-                for(int cnt = 0; cnt<e-(ultimaPos-1); cnt++ )compaux[cnt] = shop[ultimaPos+cnt];
-
-
-                shop[ultimaPos] = c;
-                for(int cnt = 0; cnt<e-(ultimaPos-1); cnt++ )shop[ultimaPos+1+cnt] = compaux[cnt];
-                e++;
+                fseek(LOTE,0,SEEK_END);
+                fwrite(&c, sizeof(compra),1, LOTE);//SE ESCRIBE EL ARCHIVO PROC.BIN
             }
         }
 
-        if(COMP = fopen("PROCESADOS.bin","wb")){
-                for(short cnt = 0 ; cnt < e ; cnt++){
-                    fseek(COMP,0,SEEK_END);
-                    fwrite(&shop[cnt], sizeof(compra),1, COMP);//SE ESCRIBE EL ARCHIVO PROC.BIN
-                    //2fseek(COMP,0,SEEK_END);
-                }
-        }
-        fclose(COMP);
+
+    fclose(LOTE);
+    /*LOTE = fopen("LOTE.bin","rb");
+
+    fread(&c,sizeof(compra),1,LOTE);
+
+    while (!feof(LOTE)){
+        //fread(&aux[i],sizeof(cliente),1,USERS);
+
+        cout << "*************** COMPRAS  ******************" << endl;
+        cout << "ID_COMPRA: " << c.id_compra  << endl;
+        cout << "USER: " << c.usid  << endl;
+        cout << "MONTO: " << c.monto  << endl;
+        cout << "CANTIDAD: " << c.cantidad  << endl;
+        cout << "FECHA Y HORA" << c.fechactucom  << endl;
+        cout << "NRO DE ARTC." << c.narticulo  << endl;
+        fread(&c,sizeof(compra),1,LOTE);
 
     }
-    else{
 
-        COMP = fopen("PROCESADOS.bin","wb");
 
-        for (int a=0 ; a<cantU-1 ; a++){//PARA CADA USUARIO SE VA A GENERAR UNA CANTIDAD DE COMPRAS ALEATORIAS
+    fclose(LOTE);*/
+    delete []aux;
+    //getch();
+    return;
+}
 
-            cnt_cpr =2;// rand()%5+1;
-            for(int b = 0 ; b<cnt_cpr; b++){//SE GENERAN ENTRE 1 Y 5 COMPRAS X USUARIO
+void ProcesarLote(void){
 
-                CompraRand(aux[a], c, monto_x_c);//PRIMER PARAMETRO RECIBIMOS LA INFO DEL COMPRADOR(CLIENTE), SEGUNDO UN AUXILIAR PARA GENERAR EL PROCESADOS.BIN, Y TERCERO TOMAMOS EL MONTO DE C/COMPRA PARA ACTUALIZAR
-                                                 //POSTERIORMENTE EL USUARIOS.BIN
-                aux[a].totalcom += monto_x_c;
+    FILE *USERS, *LOTE, *PROC;
+    int i=0, cnt_cantcom=0, e = 0, cantU=0;
 
-                fseek(COMP,0,SEEK_END);
-                fwrite(&c, sizeof(compra),1, COMP);//SE ESCRIBE EL ARCHIVO PROC.BIN
-            }
+    compra c;
+    float monto_x_c;
+
+    /*DECLARO UN VECTOR DE USUARIOS Y LO CARGO CON LOS CLIENTES EN EL ARCHIVO US.BIN PARA ACTUALIZAR EL MONTO DE CADA USUARIO*/
+
+    ContarClientes(cantU);
+    cliente *aux = new cliente[cantU-1];
+
+    if (USERS = fopen("USUARIOS.bin","rb")){
+
+        fread(&aux[i],sizeof(cliente),1,USERS);
+        while (!feof(USERS)){
+            i++;
+            fread(&aux[i],sizeof(cliente),1,USERS);
         }
-        fclose(COMP);
-
     }
+    else
+        cout<<"error";
+
+    fclose(USERS);
+
+    /*BAJO LAS COMPRAS PARA REALIZAR LA ACTUALIZACION DE LOS MONTOS Y LA CRACION O CACTUALIZACION DEL ARCHIVO PROCEASADOS.BIN*/
+
+    PROC = fopen("PROCESADOS.bin","ab");
+    if(!PROC)cout<<"error";
+
+    if (LOTE = fopen("LOTE.bin","rb")){
+
+        fread(&c,sizeof(compra),1,LOTE);
+        while (!feof(LOTE)){
+
+            e=0;
+            while(c.usid != aux[e].id_client)e++;
+            aux[e].totalcom += (c.cantidad * c.monto);
+
+            //fseek(PROC,0,SEEK_END);
+            fwrite(&c, sizeof(compra),1,PROC);
+
+            fread(&c,sizeof(compra),1,LOTE);
+        }
+    }
+    else
+        cout<<"error";
+
+    /*compra *comp = new compra[cnt_cantcom];
+
+    fread(&aux[i],sizeof(compra),1,LOTE);
+        while (!feof(LOTE)){
+            e++;
+            fread(&aux[e],sizeof(compra),1,LOTE);
+        */
 
     if (USERS = fopen("USUARIOS.bin","wb")){
 
@@ -667,52 +711,52 @@ void ProcesarLote(bool sec){
         }
     }
     fclose(USERS);
+
     delete []aux;
+    fclose(LOTE);
+    fclose(PROC);
     return;
+
 }
+
 //********** PUNTO 7  *************//
+
 void MostrarComprasDeUsuario(int id){
 
     FILE*COMP;
-    compra shop[1000], compraux[1000];
-    int e =0, a=0;
-    short posAencajar, primerPos=0, ultimaPos=0;
+    compra shop[1000];
+    int e =0, a=0, i=1;
 
     if (COMP = fopen("PROCESADOS.bin","rb")){
-        fread(&shop[e],sizeof(compra),1,COMP);
+
+        cout<<"Las compras realizadas por el usuario "<<id<<" son:";
 
         while (!feof(COMP)){
-            e++;
             fread(&shop[e],sizeof(compra),1,COMP);
+
+            if (shop[e].usid == id){
+
+                cout << "\n ------------ COMPRA NUMERO "<<i<<" ------------ \n";
+                cout << "ID_COMPRA: " << shop[e].id_compra  << endl;
+                cout << "NRO DE ARTC." << shop[e].narticulo  << endl;
+                cout << "FECHA Y HORA: " << shop[e].fechactucom << endl;
+                cout << "MONTO: $" << shop[e].monto  << endl;
+                cout << "CANTIDAD: " << shop[e].cantidad  << endl;
+                cout<<"\n --------------------------------------------------- \n";
+                i++;
+            }
+            e++;
+
         }
     }
     fclose(COMP);
 
-    while( shop[primerPos].usid != id)primerPos++;
-    while( shop[primerPos].usid == id){
-            compraux[a] = shop[primerPos];
-            a++;
-            primerPos++;
-    }
-
-    cout<<"Las compras realizadas por el usuario "<<id<<" son:";
-
-    for(int i = 0; i<a ; i++){
-
-        cout << "\n ------------ COMPRA NUMERO "<<i+1<<" ------------ \n";
-        cout << "ID_COMPRA: " << compraux[i].id_compra  << endl;
-        cout << "NRO DE ARTC." << compraux[i].narticulo  << endl;
-        cout << "FECHA Y HORA: " << compraux[i].fechactucom << endl;
-        cout << "MONTO: $" << compraux[i].monto  << endl;
-        cout << "CANTIDAD: " << compraux[i].cantidad  << endl;
-        cout<<"\n --------------------------------------------------- \n";
-
-    }
 }
 
 //********** PUNTO 8 (tiene que llegarle el vector con todas las compras) *************//
 void EscribirReporteHTML(compra v[], int tam)
 {
+
     FILE *f;
     char c1[17]="",c2[17]="";
     int i= 0;
